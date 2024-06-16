@@ -1,0 +1,150 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/fav_icon.png' %}">
+    <title>Ape Alert</title>
+
+    <!-- CSS only -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.7/css/dataTables.bootstrap5.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+    <div class="header">
+        <div class="dd">
+            <div class="wui-side-menu open pinned" data-wui-theme="dark">
+                <div class="wui-side-menu-header">
+                    <a href="#" class="wui-side-menu-trigger none"><i class="fa fa-close"
+                            style="font-size:36px"></i></a>
+                </div>
+                <div class="logo1">
+                    <div class="text-center">
+                        <img src="{% static 'img/logo.png' %}" class="img-fluid logoimg" alt="" />
+                        <img src="{% static 'img/bubble1.png' %}" class="img-fluid mt-2">
+                    </div>
+                </div>
+                <div class="siderbar-navbar-content">
+                    <ul class="wui-side-menu-items scroll-menu">
+                        <li>
+                            <a  class="wui-side-menu-item active">
+                                <i class="fa fa-home"></i>
+                                <span class="box-title">Home</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a  class="wui-side-menu-item">
+                                <i class="fa fa-calendar"></i>
+                                <span class="box-title">Alerts</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a  class="wui-side-menu-item">
+                                <i class="fa fa-rocket"></i>
+                                <span class="box-title">FAQs</span>
+                            </a>
+                        </li>
+                        <li>
+                            <div class="accordion" id="accordionExample">
+                                <div class="">
+                                    <h2 class="accordion-header" id="headingThree">
+                                        <a href="#collapseThree" class="wui-side-menu-item" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapseThree"
+                                            aria-expanded="false" aria-controls="collapseThree">
+                                            <i class="fa fa-book"></i>
+                                            <span class="box-title">Crypto</span>
+                                            <i class="fa fa-angle-down float-end"></i>
+                                            <i class="fa fa-angle-up d-none float-end"></i>
+                                        </a>
+                                    </h2>
+                                    <div id="collapseThree" class="accordion-collapse collapse"
+                                        aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            <ul class="p-0 sidebar-drop-li">
+                                                <li>MegageLarge $10B - Max</li>
+                                                <li>Mid-Market $1B - $10B </li>
+                                                <li>Small Market $100M - $1B</li>
+                                                <li>Micro Market $10M - $100M </li>
+                                                <li>Nano Market $1M - $10M </li>
+                                                <li>Pico Market $100K - $1M </li>
+                                                <li>Femto Market <$100,000</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="wui-content">
+                <div class="wui-content-header position-relative">
+                    <div class="row main_content align-items-center">
+                        <div class="col-md-12">
+                            <div class="card shadow">
+                                <div class="card-header bg-dark-light">
+                                    <h4 class="card-title text-white mb-0">Top Coins by Market Cap</h4>
+                                </div>
+                                <div class="card-block">
+                                    <div class="table-responsive">
+                                        <table id="dt-length-0" class="table table-hover w-100 table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Rank</th>
+                                                    <th>Name</th>
+                                                    <th>Symbol</th>
+                                                    <th>Price</th>
+                                                    <th>Market Cap</th>
+                                                    <th>Volume (24h)</th>
+                                                    <th>Change (24h)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for coin in coins %}
+                                                <tr>
+                                                    <td>{{ coin.rank }}</td>
+                                                    <td>{{ coin.name }}</td>
+                                                    <td>{{ coin.symbol }}</td>
+                                                    <td>{{ coin.price }}</td>
+                                                    <td>{{ coin.market_cap }}</td>
+                                                    <td>{{ coin.volume_24h }}</td>
+                                                    <td>{{ coin.change_24h }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JavaScript -->
+        <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script src="https://cdn.datatables.net/2.0.7/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/2.0.7/js/dataTables.bootstrap5.js"></script>
+        <script>
+            $(document).ready(function () {
+                $('#dt-length-0').DataTable({
+                    "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                    "dom": '<"dt-length"f><"dt-info"ilp>',
+                    "paging": true,
+                    "ordering": true,
+                    "info": true,
+                    "searching": true
+                });
+            });
+        </script>
+</body>
+
+</html>
