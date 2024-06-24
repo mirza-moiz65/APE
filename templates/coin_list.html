@@ -101,52 +101,53 @@
                         <div class="personal_Infor">
                             <div class="d-flex justify-content-between">
                                 <h1>Coins</h1>
-                                <a href="#" class="text-white p-2 btn-refresh"><i class="fa fa-refresh"></i></a>
+                                <a href="#" class="text-white p-2 btn-refresh" onclick="update_coins(event)"><i class="fa fa-refresh"></i></a>
                             </div>
                             <div class="card-block px-0 py-0">
                                 <div class="table-responsive table-striped" style="border-radius: 10px; overflow: auto;">
                                     <table id="example" class="table table-striped" style="width:100%">
                                         <thead>
                                             <tr>
-                                                <th>No</th>
-                                                <th>Crypto</th>
-                                                <th>Posts</th>
-                                                <th>Sentiment</th>
-                                                <th>Price</th>
-                                                <th>Market cap</th>
-                                                <th>Volume</th>
+                                                <th style="color:white">No</th>
+                                                <th style="color:white">Crypto</th>
+                                                <th style="color:white">Posts</th>
+                                                <th style="color:white">Sentiment</th>
+                                                <th style="color:white">Price</th>
+                                                <th style="color:white">Market cap</th>
+                                                <th style="color:white">Volume</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>1</td>
-                                                <td><img src="https://app.mooonshot.io/logos/btc.png" style="width: 20px; margin-right: 5px;">Bitcoin BTC</td>
-                                                <td>31.1k -2.2% <img src="{% static 'assets/img/monkey_icon.png' %}" style="width: 20px; margin-left: 5px;"></td>
-                                                <td>88 -3.4%</td>
-                                                <td>$62,836.15 -1.2%</td>
-                                                <td>$1.2T</td>
-                                                <td>$19B</td>
+                                        <tbody >
+                                            {% for coin in coins %}
+                                            <tr >
+                                                <td style="color:white">{{coin.id}}</td>
+                                                <td style="color:white">{{coin.name}}</td>
+                                                <td style="color:white">{{coin.posts}}</td>
+                                                <td style="color:white">88 -3.4%</td>
+                                                <td style="color:white">{{coin.price}}</td>
+                                                <td style="color:white">{{coin.market_cap}}</td>
+                                                <td style="color:white">{{coin.volume}}</td>
                                             </tr>
-                                            <tr>
-                                                <td>2</td>
-                                                <td><img src="https://app.mooonshot.io/logos/eth.png" style="width: 20px; margin-right: 5px;">Ethereum ETH</td>
-                                                <td>16.3k +4.3% <img src="{% static 'assets/img/fire_icon.png' %}" style="width: 13px; margin-left: 3px;"><img src="{% static 'assets/img/fire_icon.png' %}" style="width: 13px; margin-left: 3px;"><img src="{% static 'assets/img/fire_icon.png' %}" style="width: 13px; margin-left: 3px;"><img src="{% static 'assets/img/fire_icon.png' %}" style="width: 13px; margin-left: 3px;"></td>
-                                                <td>90 +2.7%</td>
-                                                <td>$3155.80 +1.3%</td>
-                                                <td>$383B</td>
-                                                <td>$9.3B</td>
-                                            </tr>
-                                            <tr>
-                                                <td>3</td>
-                                                <td><img src="https://app.mooonshot.io/logos/sol.png" style="width: 20px; margin-right: 5px;">Solana SOL</td>
-                                                <td>11.7k -1.2% <img src="{% static 'assets/img/fire_icon.png' %}" style="width: 13px; margin-left: 3px;"></td>
-                                                <td>85 -2.3%</td>
-                                                <td>$138.22 -2.7%</td>
-                                                <td>$62B</td>
-                                                <td>$2.2B</td>
-                                            </tr>
+                                           {% endfor %}
                                         </tbody>
                                     </table>
+                                    <div>
+                                        <span class="step-links" style="color:#9bef05">
+                                            {% if page_obj.has_previous %}
+                                                <a href="?page=1">&laquo; first</a>
+                                                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                                            {% endif %}
+                                
+                                            <span class="current" style="color:#9bef05">
+                                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                                            </span>
+                                
+                                            {% if page_obj.has_next %}
+                                                <a href="?page={{ page_obj.next_page_number }}" style="color:white">next</a>
+                                                <a href="?page={{ page_obj.paginator.num_pages }}" style="color:white">last &raquo;</a>
+                                            {% endif %}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -156,6 +157,42 @@
             </div>
         </div>
     </section>
+    <script>
+        
+        function update_coins(event) {
+            event.preventDefault();
+		
+    		
+    const wsUrl = `ws://localhost:8001/ws/coins/`;
+    // const wsUrl = `ws://${window.location.host}/ws/coins/`;
+    const socket = new WebSocket(wsUrl);
+    
+	socket.onmessage = function(event) {
+        const message = event.data;
+        if(message == '200'){
+
+            socket.close();
+            window.location.reload()
+        }
+};
+
+
+    socket.onopen = function(e) {
+        console.log('WebSocket connected');
+		// socket.send(JSON.stringify(myVar));
+    };
+	
+
+    socket.onerror = function(error) {
+        console.error('WebSocket error:', error);
+    };
+
+    socket.onclose = function(event) {
+        console.log('WebSocket closed:', event);
+		// camera_stream_websockets()
+    };
+};
+    </script>
 
     <!-- JavaScript Bundle with Popper -->
     <script type="text/javascript" src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>

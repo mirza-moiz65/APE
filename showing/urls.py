@@ -6,6 +6,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('', views.coin_list, name='coin_list'),
+    path('uploadcoins/', views.upload_csv, name='upload_coins'),
 ]
 
 if settings.DEBUG:

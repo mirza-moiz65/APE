@@ -24,7 +24,20 @@ def fetch_coins_data():
             print(f"Failed to fetch data for page {page}")
             break
     
-    return all_coins_data
+    filename = "coins_data.csv"
+    header = ["name", "symbol", "current_price", "total_volume", "market_cap"]
+
+    with open(filename, mode="w", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=header)
+        writer.writeheader()
+        for coin in all_coins_data:
+            writer.writerow({
+                "name": coin["name"],
+                "symbol": coin["symbol"],
+                "current_price": coin["current_price"],
+                "total_volume": coin["total_volume"],
+                "market_cap": coin["market_cap"],
+            })
 
 def save_to_csv(coins_data, filename="coins_data.csv"):
     # Define the header

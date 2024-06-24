@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'showing'
+    'channels',
+    'showing',
 ]
 
 MIDDLEWARE = [
@@ -72,6 +73,14 @@ TEMPLATES = [
 ]
 
 # WSGI_APPLICATION = 'coins.wsgi.application'
+WSGI_APPLICATION = 'coins.wsgi.application'
+ASGI_APPLICATION = 'coins.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 
 # Database
@@ -87,6 +96,8 @@ DATABASES = {
         'PORT': '5432'
     }
 }
+
+
 
 
 # Password validation

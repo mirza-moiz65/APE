@@ -8,10 +8,16 @@ from django.http import HttpResponse
 
 def upload_csv(request):
     # Scrape data using chrome_scrape function
-    scrapper_result = chrome_scrape()
-    print(scrapper_result)  # For debugging purposes
+    
+    
     
     csv_filename = "coins_data.csv"  # Replace with your CSV file path
+    scrapper_result = chrome_scrape(csv_filename)
+    if scrapper_result is not None:
+        print("Scraping completed successfully.")
+        print(scrapper_result)
+    else:
+        print("Scraping encountered errors.")
 
     with open(csv_filename, mode='r') as file:
         reader = csv.reader(file)
@@ -43,7 +49,7 @@ def upload_csv(request):
             # Save the Crypto object with updated posts attribute
             crypto_obj.save()
 
-    return HttpResponse("CSV uploaded successfully!")
+    return HttpResponse("CSV uploaded successfully!",status=200)
 
 
 def coin_list(request):
@@ -53,8 +59,10 @@ def coin_list(request):
     # Paginate the data
     paginator = Paginator(coins, 100)  # Show 100 items per page
     page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     try:
         paginated_coins = paginator.page(page_number)
+        
     except PageNotAnInteger:
         paginated_coins = paginator.page(1)  # If page is not an integer, deliver first page.
     except EmptyPage:
@@ -62,5 +70,6 @@ def coin_list(request):
 
     context = {
         'coins': paginated_coins,
+        'page_obj':page_obj,
     }
     return render(request, 'coin_list.html', context)
