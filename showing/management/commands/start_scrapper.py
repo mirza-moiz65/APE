@@ -33,6 +33,7 @@ class Command(BaseCommand):
             }
 
             print(f"SYMBOL: {coin.symbol}, Page: {page}")
+            retry = 0
             async with session.get(url, headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -73,7 +74,10 @@ class Command(BaseCommand):
                     max_cursor = data['cursor']['max']
                 else:
                     logger.error(f"Failed to fetch posts for {coin.symbol}: {response.status}")
-                    break
+                    await asyncio.sleep(RATE_LIMIT_DELAY)
+                    if retry > 4:
+                        break
+                    retry = retry + 1
             page += 1
             await asyncio.sleep(RATE_LIMIT_DELAY)  # Add delay to prevent hitting rate limits
 
