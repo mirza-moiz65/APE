@@ -9,7 +9,7 @@ class Coin(models.Model):
     price_change_percentage = models.CharField(max_length=30, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.name} ({self.symbol})"
+        return f"{self.symbol}"
 
 class Post(models.Model):
     crypto = models.ForeignKey(Coin, on_delete=models.CASCADE, related_name='posts')

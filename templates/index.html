@@ -254,11 +254,14 @@
                     } else {
                         const startNumber = (page - 1) * data.page_size + 1;
                         data.results.forEach((coin, index) => {
+                            let price_change_percentage = 0
                             let priceChangeColor = 'white';
                             if (coin.price_change_percentage < 0) {
                                 priceChangeColor = 'red';
+                                price_change_percentage = coin.price_change_percentage;
                             } else if (coin.price_change_percentage > 0) {
                                 priceChangeColor = 'green';
+                                price_change_percentage = coin.price_change_percentage;
                             }
     
                             const formattedPrice = coin.price > 1 ? parseFloat(coin.price).toFixed(2) : coin.price;
@@ -270,7 +273,7 @@
                                 <td>${coin.symbol.replace('USDT', '')}</td>
                                 <td>${coin.posts_last_24_hours || '0'}</td>
                                 <td>${coin.sentiment || '0'}</td>
-                                <td>$ ${formattedPrice} <span class="price-change" style="color:${priceChangeColor}">${coin.price_change_percentage}%</span></td>
+                                <td>$ ${formattedPrice} <span class="price-change" style="color:${priceChangeColor }">${price_change_percentage}%</span></td>
                                 <td>${formattedMarketCap}</td>
                                 <td>${formattedVolume}</td>
                             </tr>`;
