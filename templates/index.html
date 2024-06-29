@@ -1,0 +1,314 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/img/fav_icon.png' %}">
+    <title>Ape Alert</title>
+
+    <!-- CSS only -->
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.7/css/dataTables.bootstrap5.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/style.css' %}">
+</head>
+
+<body>
+    <style>
+        .table {
+            color: white !important;
+        }
+        .pagination-links {
+            display: flex;
+            justify-content: flex-end;
+            gap: 5px;
+        }
+        
+        .pagination-links a {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 15px;
+            background-color: #9bef05;
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .pagination-links a.disabled {
+            pointer-events: none;
+            background-color: grey;
+            color: white;
+        }
+        
+        .price-change {
+            font-size: .75rem;
+            line-height: 1rem;
+        }
+    </style>
+    <section class="header">
+        <div class="dd">
+            <div class="wui-side-menu open pinned" data-wui-theme="dark">
+                <div class="wui-side-menu-header">
+                    <a href="#" class="wui-side-menu-trigger none"><i class="fa fa-close" style="font-size:36px"></i></a>
+                </div>
+
+                <div class="logo1">
+                    <div class="text-center">
+                        <img src="{% static 'assets/img/logo.png' %}" class="img-fluid logoimg" style="max-width: 50%;">
+                        <img src="{% static 'assets/img/bubble1.png' %}" class="img-fluid mt-2" style="max-width: 50%;">
+                    </div>
+                </div>
+                <div class="siderbar-navbar-content">
+                    <ul class="wui-side-menu-items scroll-menu">
+                        <li>
+                            <a class="wui-side-menu-item active" href="/">
+                                <i class="fa fa-home"></i>
+                                <span class="box-title">Home</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="wui-side-menu-item">
+                                <i class="fa fa-calendar"></i>
+                                <span class="box-title">Alerts</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="wui-side-menu-item">
+                                <i class="fa fa-rocket"></i>
+                                <span class="box-title">FAQs</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="wui-side-menu-item market-cap-filter" data-cap="mega">
+                                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-2"><path opacity=".05" d="M6.78296 13.376C8.73904 9.95284 8.73904 5.04719 6.78296 1.62405L7.21708 1.37598C9.261 4.95283 9.261 10.0472 7.21708 13.624L6.78296 13.376Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path><path opacity=".1" d="M7.28204 13.4775C9.23929 9.99523 9.23929 5.00475 7.28204 1.52248L7.71791 1.2775C9.76067 4.9119 9.76067 10.0881 7.71791 13.7225L7.28204 13.4775Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path><path opacity=".15" d="M7.82098 13.5064C9.72502 9.99523 9.72636 5.01411 7.82492 1.50084L8.26465 1.26285C10.2465 4.92466 10.2451 10.085 8.26052 13.7448L7.82098 13.5064Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path><path opacity=".2" d="M8.41284 13.429C10.1952 9.92842 10.1957 5.07537 8.41435 1.57402L8.85999 1.34729C10.7139 4.99113 10.7133 10.0128 8.85841 13.6559L8.41284 13.429Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path><path opacity=".25" d="M9.02441 13.2956C10.6567 9.8379 10.6586 5.17715 9.03005 1.71656L9.48245 1.50366C11.1745 5.09919 11.1726 9.91629 9.47657 13.5091L9.02441 13.2956Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path><path opacity=".3" d="M9.66809 13.0655C11.1097 9.69572 11.1107 5.3121 9.67088 1.94095L10.1307 1.74457C11.6241 5.24121 11.6231 9.76683 10.1278 13.2622L9.66809 13.0655Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path><path opacity=".35" d="M10.331 12.7456C11.5551 9.52073 11.5564 5.49103 10.3347 2.26444L10.8024 2.0874C12.0672 5.42815 12.0659 9.58394 10.7985 12.9231L10.331 12.7456Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path><path opacity=".4" d="M11.0155 12.2986C11.9938 9.29744 11.9948 5.71296 11.0184 2.71067L11.4939 2.55603C12.503 5.6589 12.502 9.35178 11.4909 12.4535L11.0155 12.2986Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path><path opacity=".45" d="M11.7214 11.668C12.4254 9.01303 12.4262 5.99691 11.7237 3.34116L12.2071 3.21329C12.9318 5.95292 12.931 9.05728 12.2047 11.7961L11.7214 11.668Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path><path opacity=".5" d="M12.4432 10.752C12.8524 8.63762 12.8523 6.36089 12.4429 4.2466L12.9338 4.15155C13.3553 6.32861 13.3554 8.66985 12.9341 10.847L12.4432 10.752Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path><path d="M0.877075 7.49988C0.877075 3.84219 3.84222 0.877045 7.49991 0.877045C11.1576 0.877045 14.1227 3.84219 14.1227 7.49988C14.1227 11.1575 11.1576 14.1227 7.49991 14.1227C3.84222 14.1227 0.877075 11.1575 0.877075 7.49988ZM7.49991 1.82704C4.36689 1.82704 1.82708 4.36686 1.82708 7.49988C1.82708 10.6329 4.36689 13.1727 7.49991 13.1727C10.6329 13.1727 13.1727 10.6329 13.1727 7.49988C13.1727 4.36686 10.6329 1.82704 7.49991 1.82704Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                <span class="box-title">Mega > $200B</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="wui-side-menu-item market-cap-filter" data-cap="large">
+                                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-2"><path d="M7.75432 0.819537C7.59742 0.726821 7.4025 0.726821 7.24559 0.819537L1.74559 4.06954C1.59336 4.15949 1.49996 4.32317 1.49996 4.5C1.49996 4.67683 1.59336 4.84051 1.74559 4.93046L7.24559 8.18046C7.4025 8.27318 7.59742 8.27318 7.75432 8.18046L13.2543 4.93046C13.4066 4.84051 13.5 4.67683 13.5 4.5C13.5 4.32317 13.4066 4.15949 13.2543 4.06954L7.75432 0.819537ZM7.49996 7.16923L2.9828 4.5L7.49996 1.83077L12.0171 4.5L7.49996 7.16923ZM1.5695 7.49564C1.70998 7.2579 2.01659 7.17906 2.25432 7.31954L7.49996 10.4192L12.7456 7.31954C12.9833 7.17906 13.2899 7.2579 13.4304 7.49564C13.5709 7.73337 13.4921 8.03998 13.2543 8.18046L7.75432 11.4305C7.59742 11.5232 7.4025 11.5232 7.24559 11.4305L1.74559 8.18046C1.50786 8.03998 1.42901 7.73337 1.5695 7.49564ZM1.56949 10.4956C1.70998 10.2579 2.01658 10.1791 2.25432 10.3195L7.49996 13.4192L12.7456 10.3195C12.9833 10.1791 13.2899 10.2579 13.4304 10.4956C13.5709 10.7334 13.4921 11.04 13.2543 11.1805L7.75432 14.4305C7.59742 14.5232 7.4025 14.5232 7.24559 14.4305L1.74559 11.1805C1.50785 11.04 1.42901 10.7334 1.56949 10.4956Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                <span class="box-title">Large $10B - $200B</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="wui-side-menu-item market-cap-filter" data-cap="mid-market">
+                                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-2"><path d="M7.85367 1.48956C7.65841 1.29429 7.34182 1.29429 7.14656 1.48956L1.48971 7.14641C1.29445 7.34167 1.29445 7.65825 1.48971 7.85352L7.14656 13.5104C7.34182 13.7056 7.65841 13.7056 7.85367 13.5104L13.5105 7.85352C13.7058 7.65825 13.7058 7.34167 13.5105 7.14641L7.85367 1.48956ZM7.5 2.55033L2.55037 7.49996L7.5 12.4496V2.55033Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                <span class="box-title">Mid-Market $1B - $10B</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="wui-side-menu-item market-cap-filter" data-cap="small-market">
+                                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-2"><path d="M9.94969 7.49989C9.94969 8.85288 8.85288 9.94969 7.49989 9.94969C6.14691 9.94969 5.0501 8.85288 5.0501 7.49989C5.0501 6.14691 6.14691 5.0501 7.49989 5.0501C8.85288 5.0501 9.94969 6.14691 9.94969 7.49989ZM10.8632 8C10.6213 9.64055 9.20764 10.8997 7.49989 10.8997C5.79214 10.8997 4.37847 9.64055 4.13662 8H0.5C0.223858 8 0 7.77614 0 7.5C0 7.22386 0.223858 7 0.5 7H4.13659C4.37835 5.35935 5.79206 4.1001 7.49989 4.1001C9.20772 4.1001 10.6214 5.35935 10.8632 7H14.5C14.7761 7 15 7.22386 15 7.5C15 7.77614 14.7761 8 14.5 8H10.8632Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                <span class="box-title">Small Market $100M - $1B</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="wui-side-menu-item market-cap-filter" data-cap="micro-market">
+                                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-2"><path d="M11.1464 6.85355C11.3417 7.04882 11.6583 7.04882 11.8536 6.85355C12.0488 6.65829 12.0488 6.34171 11.8536 6.14645L7.85355 2.14645C7.65829 1.95118 7.34171 1.95118 7.14645 2.14645L3.14645 6.14645C2.95118 6.34171 2.95118 6.65829 3.14645 6.85355C3.34171 7.04882 3.65829 7.04882 3.85355 6.85355L7.5 3.20711L11.1464 6.85355ZM11.1464 12.8536C11.3417 13.0488 11.6583 13.0488 11.8536 12.8536C12.0488 12.6583 12.0488 12.3417 11.8536 12.1464L7.85355 8.14645C7.65829 7.95118 7.34171 7.95118 7.14645 8.14645L3.14645 12.1464C2.95118 12.3417 2.95118 12.6583 3.14645 12.8536C3.34171 13.0488 3.65829 13.0488 3.85355 12.8536L7.5 9.20711L11.1464 12.8536Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                <span class="box-title">Micro Market $10M - $100M</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="wui-side-menu-item market-cap-filter" data-cap="nano-market">
+                                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-2"><path d="M2.85714 2H12.1429C12.6162 2 13 2.38376 13 2.85714V12.1429C13 12.6162 12.6162 13 12.1429 13H2.85714C2.38376 13 2 12.6162 2 12.1429V2.85714C2 2.38376 2.38376 2 2.85714 2ZM1 2.85714C1 1.83147 1.83147 1 2.85714 1H12.1429C13.1685 1 14 1.83147 14 2.85714V12.1429C14 13.1685 13.1685 14 12.1429 14H2.85714C1.83147 14 1 13.1685 1 12.1429V2.85714ZM7.49988 5.00012C7.77602 5.00012 7.99988 4.77626 7.99988 4.50012C7.99988 4.22398 7.77602 4.00012 7.49988 4.00012C7.22374 4.00012 6.99988 4.22398 6.99988 4.50012C6.99988 4.77626 7.22374 5.00012 7.49988 5.00012ZM4.49988 11.0001C4.77602 11.0001 4.99988 10.7763 4.99988 10.5001C4.99988 10.224 4.77602 10.0001 4.49988 10.0001C4.22374 10.0001 3.99988 10.224 3.99988 10.5001C3.99988 10.7763 4.22374 11.0001 4.49988 11.0001ZM4.99988 7.50012C4.99988 7.77626 4.77602 8.00012 4.49988 8.00012C4.22374 8.00012 3.99988 7.77626 3.99988 7.50012C3.99988 7.22398 4.22374 7.00012 4.49988 7.00012C4.77602 7.00012 4.99988 7.22398 4.99988 7.50012ZM4.49988 5.00012C4.77602 5.00012 4.99988 4.77626 4.99988 4.50012C4.99988 4.22398 4.77602 4.00012 4.49988 4.00012C4.22374 4.00012 3.99988 4.22398 3.99988 4.50012C3.99988 4.77626 4.22374 5.00012 4.49988 5.00012ZM10.9999 10.5001C10.9999 10.7763 10.776 11.0001 10.4999 11.0001C10.2237 11.0001 9.99988 10.7763 9.99988 10.5001C9.99988 10.224 10.2237 10.0001 10.4999 10.0001C10.776 10.0001 10.9999 10.224 10.9999 10.5001ZM10.4999 8.00012C10.776 8.00012 10.9999 7.77626 10.9999 7.50012C10.9999 7.22398 10.776 7.00012 10.4999 7.00012C10.2237 7.00012 9.99988 7.22398 9.99988 7.50012C9.99988 7.77626 10.2237 8.00012 10.4999 8.00012ZM10.9999 4.50012C10.9999 4.77626 10.776 5.00012 10.4999 5.00012C10.2237 5.00012 9.99988 4.77626 9.99988 4.50012C9.99988 4.22398 10.2237 4.00012 10.4999 4.00012C10.776 4.00012 10.9999 4.22398 10.9999 4.50012ZM7.49988 11.0001C7.77602 11.0001 7.99988 10.7763 7.99988 10.5001C7.99988 10.224 7.77602 10.0001 7.49988 10.0001C7.22374 10.0001 6.99988 10.224 6.99988 10.5001C6.99988 10.7763 7.22374 11.0001 7.49988 11.0001Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                <span class="box-title">Nano Market $1M - $10M</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="wui-side-menu-item market-cap-filter" data-cap="pico-market">
+                                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-2"><path d="M1.49988 2.00012C1.77602 2.00012 1.99988 1.77626 1.99988 1.50012C1.99988 1.22398 1.77602 1.00012 1.49988 1.00012C1.22374 1.00012 0.999878 1.22398 0.999878 1.50012C0.999878 1.77626 1.22374 2.00012 1.49988 2.00012ZM4.49988 2.00012C4.77602 2.00012 4.99988 1.77626 4.99988 1.50012C4.99988 1.22398 4.77602 1.00012 4.49988 1.00012C4.22374 1.00012 3.99988 1.22398 3.99988 1.50012C3.99988 1.77626 4.22374 2.00012 4.49988 2.00012ZM7.99988 1.50012C7.99988 1.77626 7.77602 2.00012 7.49988 2.00012C7.22374 2.00012 6.99988 1.77626 6.99988 1.50012C6.99988 1.22398 7.22374 1.00012 7.49988 1.00012C7.77602 1.00012 7.99988 1.22398 7.99988 1.50012ZM10.4999 2.00012C10.776 2.00012 10.9999 1.77626 10.9999 1.50012C10.9999 1.22398 10.776 1.00012 10.4999 1.00012C10.2237 1.00012 9.99988 1.22398 9.99988 1.50012C9.99988 1.77626 10.2237 2.00012 10.4999 2.00012ZM13.9999 1.50012C13.9999 1.77626 13.776 2.00012 13.4999 2.00012C13.2237 2.00012 12.9999 1.77626 12.9999 1.50012C12.9999 1.22398 13.2237 1.00012 13.4999 1.00012C13.776 1.00012 13.9999 1.22398 13.9999 1.50012ZM1.49988 14.0001C1.77602 14.0001 1.99988 13.7763 1.99988 13.5001C1.99988 13.224 1.77602 13.0001 1.49988 13.0001C1.22374 13.0001 0.999878 13.224 0.999878 13.5001C0.999878 13.7763 1.22374 14.0001 1.49988 14.0001ZM1.99988 10.5001C1.99988 10.7763 1.77602 11.0001 1.49988 11.0001C1.22374 11.0001 0.999878 10.7763 0.999878 10.5001C0.999878 10.224 1.22374 10.0001 1.49988 10.0001C1.77602 10.0001 1.99988 10.224 1.99988 10.5001ZM1.49988 8.00012C1.77602 8.00012 1.99988 7.77626 1.99988 7.50012C1.99988 7.22398 1.77602 7.00012 1.49988 7.00012C1.22374 7.00012 0.999878 7.22398 0.999878 7.50012C0.999878 7.77626 1.22374 8.00012 1.49988 8.00012ZM1.99988 4.50012C1.99988 4.77626 1.77602 5.00012 1.49988 5.00012C1.22374 5.00012 0.999878 4.77626 0.999878 4.50012C0.999878 4.22398 1.22374 4.00012 1.49988 4.00012C1.77602 4.00012 1.99988 4.22398 1.99988 4.50012ZM13.4999 11.0001C13.776 11.0001 13.9999 10.7763 13.9999 10.5001C13.9999 10.224 13.776 10.0001 13.4999 10.0001C13.2237 10.0001 12.9999 10.224 12.9999 10.5001C12.9999 10.7763 13.2237 11.0001 13.4999 11.0001ZM13.9999 7.50012C13.9999 7.77626 13.776 8.00012 13.4999 8.00012C13.2237 8.00012 12.9999 7.77626 12.9999 7.50012C12.9999 7.22398 13.2237 7.00012 13.4999 7.00012C13.776 7.00012 13.9999 7.22398 13.9999 7.50012ZM13.4999 5.00012C13.776 5.00012 13.9999 4.77626 13.9999 4.50012C13.9999 4.22398 13.776 4.00012 13.4999 4.00012C13.2237 4.00012 12.9999 4.22398 12.9999 4.50012C12.9999 4.77626 13.2237 5.00012 13.4999 5.00012ZM4.99988 13.5001C4.99988 13.7763 4.77602 14.0001 4.49988 14.0001C4.22374 14.0001 3.99988 13.7763 3.99988 13.5001C3.99988 13.224 4.22374 13.0001 4.49988 13.0001C4.77602 13.0001 4.99988 13.224 4.99988 13.5001ZM7.49988 14.0001C7.77602 14.0001 7.99988 13.7763 7.99988 13.5001C7.99988 13.224 7.77602 13.0001 7.49988 13.0001C7.22374 13.0001 6.99988 13.224 6.99988 13.5001C6.99988 13.7763 7.22374 14.0001 7.49988 14.0001ZM10.9999 13.5001C10.9999 13.7763 10.776 14.0001 10.4999 14.0001C10.2237 14.0001 9.99988 13.7763 9.99988 13.5001C9.99988 13.224 10.2237 13.0001 10.4999 13.0001C10.776 13.0001 10.9999 13.224 10.9999 13.5001ZM13.4999 14.0001C13.776 14.0001 13.9999 13.7763 13.9999 13.5001C13.9999 13.224 13.776 13.0001 13.4999 13.0001C13.2237 13.0001 12.9999 13.224 12.9999 13.5001C12.9999 13.7763 13.2237 14.0001 13.4999 14.0001ZM3.99988 5.00012C3.99988 4.44784 4.44759 4.00012 4.99988 4.00012H9.99988C10.5522 4.00012 10.9999 4.44784 10.9999 5.00012V10.0001C10.9999 10.5524 10.5522 11.0001 9.99988 11.0001H4.99988C4.44759 11.0001 3.99988 10.5524 3.99988 10.0001V5.00012ZM4.99988 5.00012H9.99988V10.0001H4.99988V5.00012Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                <span class="box-title">Pico Market $100K - $1M</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="wui-side-menu-item market-cap-filter" data-cap="femto-market">
+                                <img style="width: 15px" src="https://www.svgrepo.com/show/497810/buy-crypto.svg"></img>
+                                <span class="box-title">Femto Market < $100,000</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="wui-content">
+                <div class="wui-content-header position-relative">
+                    <div class="row main_content align-items-center"
+                        style="border-radius: 30px; padding: 10px 25px !important;">
+                        <div class="col-12">
+                            <div>
+                                <img src="{% static 'assets/img/top_banner.png' %}" class="img-fluid"
+                                    style="height: 110px; width: 2930px !important; border-radius: 13px; border: 2px solid #363636;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="main_content" style="border-radius: 13px;">
+                    <div class="container-fluid px-0">
+                        <div class="personal_Infor mb-3 d-flex py-0 d-md-none">
+                            <a href="#" class="wui-side-menu-trigger ms-0 m-2"><i class="fa fa-reorder"></i></a>
+                            <h1 class="mb-0">Home</h1>
+                        </div>
+                        <div class="personal_Infor">
+                            <div class="d-flex justify-content-between">
+                                <h1>Coins</h1>
+                                <input id="page" hidden value="1">
+                                <a href="#" class="text-white p-2 btn-refresh" onclick="fetchCoins(currentPage);"><i
+                                        class="fa fa-refresh"></i></a>
+                            </div>
+                            <div class="card-block px-0 py-0">
+                                <div class="table-responsive" style="border-radius: 10px; overflow: auto; height: 555px;">
+                                    <table id="coins-table" class="table" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Crypto</th>
+                                                <th>Posts [24h]</th>
+                                                <th>Sentiment</th>
+                                                <th>Price [24%]</th>
+                                                <th>Market cap</th>
+                                                <th>Volume</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="coins-table-body">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div id='pagination'></div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- JavaScript Bundle with Popper -->
+    <script type="text/javascript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/dashboard.js' %}"></script>
+    <script src="https://cdn.datatables.net/2.0.7/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.0.7/js/dataTables.bootstrap5.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script type="text/javascript">
+        let currentPage = 1;
+
+        $(document).ready(function () {
+            $(".accordion-header .wui-side-menu-item").click(function () {
+                $(this).toggleClass("active");
+                $(this).find('.fa-angle-down, .fa-angle-up').toggleClass("d-none");
+            });
+        
+            fetchCoins();
+        });
+
+        function activateTab(cap) {
+            if (cap) {
+                $('.wui-side-menu-item').removeClass('active');
+                $(`.market-cap-filter[data-cap="${cap}"]`).addClass('active');
+            }
+        }
+
+        $('.market-cap-filter').click(function(event) {
+            event.preventDefault();
+            const cap = $(this).data('cap');
+            const url = new URL(window.location);
+            url.searchParams.set('cap', cap);
+            window.history.pushState({}, '', url);
+            fetchCoins(currentPage);
+        });
+
+        function formatNumber(number) {
+            if (number >= 1e9) {
+                return (number / 1e9).toFixed(1) + 'B';
+            } else if (number >= 1e6) {
+                return (number / 1e6).toFixed(1) + 'M';
+            } else if (number >= 1e3) {
+                return (number / 1e3).toFixed(1) + 'K';
+            } else {
+                return number;
+            }
+        }
+        
+        function fetchCoins(page = 1) {
+            currentPage = page; // Update current page
+            const urlParams = new URLSearchParams(window.location.search);
+            const cap = urlParams.get('cap');
+            
+            $.ajax({
+                url: `/api/coins/?page=${page}&cap=${cap || ''}`,
+                method: 'GET',
+                success: function (data) {
+                    const coinTableBody = $('#coins-table-body');
+                    coinTableBody.empty();
+    
+                    if (data.results.length === 0) {
+                        coinTableBody.append('<tr><td colspan="7" style="color:white; text-align:center;">No data available</td></tr>');
+                    } else {
+                        const startNumber = (page - 1) * data.page_size + 1;
+                        data.results.forEach((coin, index) => {
+                            let priceChangeColor = 'white';
+                            if (coin.price_change_percentage < 0) {
+                                priceChangeColor = 'red';
+                            } else if (coin.price_change_percentage > 0) {
+                                priceChangeColor = 'green';
+                            }
+    
+                            const formattedPrice = coin.price > 1 ? parseFloat(coin.price).toFixed(2) : coin.price;
+                            const formattedMarketCap = formatNumber(coin.market_cap);
+                            const formattedVolume = formatNumber(coin.volume);
+    
+                            const row = `<tr>
+                                <td>${startNumber + index}</td>
+                                <td>${coin.symbol.replace('USDT', '')}</td>
+                                <td>${coin.posts_last_24_hours || '0'}</td>
+                                <td>${coin.sentiment || '0'}</td>
+                                <td>$ ${formattedPrice} <span class="price-change" style="color:${priceChangeColor}">${coin.price_change_percentage}%</span></td>
+                                <td>${formattedMarketCap}</td>
+                                <td>${formattedVolume}</td>
+                            </tr>`;
+                            coinTableBody.append(row);
+                        });
+                    }
+    
+                    const pagination = $('#pagination');
+                    pagination.empty();
+    
+                    const totalPages = data.total_pages;
+    
+                    const createPageLink = (label, targetPage, isDisabled) => {
+                        return `<a href="#" onclick="fetchCoins(${targetPage})" class="${isDisabled ? 'disabled' : ''}" style="${isDisabled ? 'pointer-events: none;' : ''}">${label}</a>`;
+                    };
+    
+                    const pageLinks = `<div class="d-flex justify-content-between align-items-center">
+                        <span class="current" style="color:#9bef05;">
+                            Page ${currentPage} of ${totalPages}.
+                        </span>
+                        <div class="pagination-links">
+                            ${createPageLink('&laquo; first', 1, currentPage === 1)}
+                            ${createPageLink('previous', currentPage - 1, !data.previous)}
+                            ${createPageLink('next', currentPage + 1, !data.next)}
+                            ${createPageLink('last &raquo;', totalPages, currentPage === totalPages)}
+                        </div>
+                    </div>`;
+    
+                    pagination.append(pageLinks);
+    
+                    activateTab(cap); // Activate the corresponding tab based on query parameter
+                },
+                error: function (error) {
+                    console.error('Error fetching coins:', error);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

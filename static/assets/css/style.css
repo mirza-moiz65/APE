@@ -7,7 +7,8 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #202020 !important
+    background-color: #202020 !important;
+    font-size: 12px;
 }
 html, body {
     max-width: 100%;
@@ -410,7 +411,7 @@ input[type=date]::-webkit-datetime-edit {
     position: fixed;
     top: 0;
     left: 0;
-    width: 250px;
+    width: 280px;
     height: 100%;
     backface-visibility: hidden;
     z-index: 3;
@@ -556,7 +557,7 @@ input[type=date]::-webkit-datetime-edit {
     }
 
     .wui-side-menu.open.pinned~.wui-content {
-        left: 250px;
+        left: 290px;
         right: 20px;
     }
 }
@@ -579,11 +580,13 @@ ul.wui-side-menu-items {
     padding: 10px 20px;
     border-radius: 30px;
     color: #fff;
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 500;
     line-height: 20px;
     letter-spacing: 0em;
     text-decoration: none;
+    cursor: pointer;
+    padding: 8px !important;
 }
 
 .wui-side-menu .wui-side-menu-item.active {

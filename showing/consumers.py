@@ -1,72 +1,54 @@
-
-import django
-import os
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'coins.settings')
-django.setup()
+import asyncio
 import json
-from channels.generic.websocket import WebsocketConsumer
-import requests
-import csv 
-from showing.views import upload_csv
+import websockets
+from django.db import connections
+from asgiref.sync import sync_to_async
 
+class BinanceConsumer:
+    async def connect(self):
+        print("Connecting to Binance WebSocket...")
+        await self.fetch_prices()
 
-class RTSPConsumer(WebsocketConsumer):
+    async def fetch_prices(self):
+        url = "wss://stream.binance.com:9443/ws/!ticker@arr"
+        async with websockets.connect(url, ping_interval=180, ping_timeout=600) as websocket:
+            while True:
+                try:
+                    message = await websocket.recv()
+                    await self.update_prices(message)
+                except websockets.ConnectionClosed:
+                    print("Connection closed, reconnecting...")
+                    await asyncio.sleep(5)
+                    await self.fetch_prices()
+                except Exception as e:
+                    print(f"Error: {e}")
+                    await asyncio.sleep(5)
 
-    def connect(self):
-        self.accept()
-        self.fetch_coins_data()
+    async def update_prices(self, message):
+        data = json.loads(message)
+        for ticker in data:
+            symbol = ticker['s']
+            if symbol.endswith('USDT'):
+                price = ticker['c']
+                volume = ticker['v']
+                market_cap = ticker['q']
+                price_change_percentage = ticker['P']
 
-    def disconnect(self, close_code):
-       pass
+                await self.update_coin_data(symbol, price, volume, market_cap, price_change_percentage)
 
-    def receive(self, text_data=None, bytes_data=None):
-        pass
-    
-    def fetch_coins_data(self):
-        url = "https://api.coingecko.com/api/v3/coins/markets"
-        params = {
-            "vs_currency": "usd",  # Specify the currency you want the price in
-            "order": "market_cap_desc",  # Order by market capitalization
-            "per_page": 250,  # Number of results per page (maximum is 250)
-            "page": 1,  # Starting page number
-        }
-        
-        all_coins_data = []
-        total_pages = 40  # To fetch 10,000 coins (250 coins per page * 40 pages)
-        
-        for page in range(1, total_pages + 1):
-            params["page"] = page
-            response = requests.get(url, params=params)
-            
-            if response.status_code == 200:
-                data = response.json()
-                all_coins_data.extend(data)
-            else:
-                print(f"Failed to fetch data for page {page}")
-                break
-        
-        filename = "coins_data.csv"
-        header = ["name", "symbol", "current_price", "total_volume", "market_cap"]
+    @sync_to_async
+    def update_coin_data(self, symbol, price, volume, market_cap, price_change_percentage):
+        from .models import Coin
+        print(f"Updating {symbol} price to {price}")
 
-        with open(filename, mode="w", newline="", encoding="utf-8") as file:
-            writer = csv.DictWriter(file, fieldnames=header)
-            writer.writeheader()
-            for coin in all_coins_data:
-                writer.writerow({
-                    "name": coin["name"],
-                    "symbol": coin["symbol"],
-                    "current_price": coin["current_price"],
-                    "total_volume": coin["total_volume"],
-                    "market_cap": coin["market_cap"],
-                })
-        
-        response = upload_csv(filename)
-        if(response.status_code == 200):
-            self.send(text_data="200")
-
-    
-
-   
-
-    
+        try:
+            coin = Coin.objects.get(symbol=symbol)
+            coin.price = price
+            coin.volume = volume
+            coin.market_cap = market_cap
+            coin.price_change_percentage = price_change_percentage
+            coin.save()
+        except Coin.DoesNotExist:
+            Coin.objects.create(
+                symbol=symbol, price=price, volume=volume, market_cap=market_cap, price_change_percentage=price_change_percentage
+            )

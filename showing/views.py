@@ -1,75 +1,56 @@
 from django.shortcuts import render
-import csv
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .models import Crypto  # Import your model if defined
-from .custom_scraper import chrome_scrape
-from django.http import HttpResponse
+from rest_framework import generics
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from django.db.models.functions import Cast
+from django.db.models import CharField
+from .models import Coin
+from .serializers import CoinSerializer
 
+def index(request):
+    return render(request, 'index.html')
 
-def upload_csv(request):
-    # Scrape data using chrome_scrape function
-    
-    
-    
-    csv_filename = "coins_data.csv"  # Replace with your CSV file path
-    scrapper_result = chrome_scrape(csv_filename)
-    if scrapper_result is not None:
-        print("Scraping completed successfully.")
-        print(scrapper_result)
-    else:
-        print("Scraping encountered errors.")
+class CustomPageNumberPagination(PageNumberPagination):
+    page_size = 100
 
-    with open(csv_filename, mode='r') as file:
-        reader = csv.reader(file)
-        next(reader)  # Skip header row
-        for row in reader:
-            # Assuming CSV columns are in the order: Name, Symbol, Current Price, Total Volume, Market Cap
-            name, symbol, current_price, total_volume, market_cap = row
-            
-            # Create or update Crypto objects based on CSV data
-            crypto_obj, created = Crypto.objects.get_or_create(
-                symbol=symbol,
-                defaults={
-                    'name': name,
-                    'price': float(current_price),
-                    'market_cap': float(market_cap),
-                    'volume': float(total_volume),
-                    'posts': 0  # Initialize posts to 0
-                }
-            )
-            
-            # Find corresponding scrapper_result object by name
-            matching_objects = [obj for obj in scrapper_result if obj['name'] == name]
-            if matching_objects:
-                # Assuming scrapper_result has exactly one matching object
-                scrapper_data = matching_objects[0]
-                # Update posts attribute based on scrapper result
-                crypto_obj.posts = scrapper_data.get('count', 0)  # Update posts attribute
+    def get_paginated_response(self, data):
+        return Response({
+            'count': self.page.paginator.count,
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'page_size': self.page_size,
+            'current_page': self.page.number,
+            'total_pages': self.page.paginator.num_pages,
+            'results': data,
+        })
 
-            # Save the Crypto object with updated posts attribute
-            crypto_obj.save()
+class CoinListView(generics.ListAPIView):
+    serializer_class = CoinSerializer
+    pagination_class = CustomPageNumberPagination
 
-    return HttpResponse("CSV uploaded successfully!",status=200)
-
-
-def coin_list(request):
-    # Fetch all the coin records from the Crypto model
-    coins = Crypto.objects.all()
-
-    # Paginate the data
-    paginator = Paginator(coins, 100)  # Show 100 items per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    try:
-        paginated_coins = paginator.page(page_number)
+    def get_queryset(self):
+        queryset = Coin.objects.all().order_by('symbol')
+        cap = self.request.query_params.get('cap', None)
         
-    except PageNotAnInteger:
-        paginated_coins = paginator.page(1)  # If page is not an integer, deliver first page.
-    except EmptyPage:
-        paginated_coins = paginator.page(paginator.num_pages)  # If page is out of range, deliver last page.
-
-    context = {
-        'coins': paginated_coins,
-        'page_obj':page_obj,
-    }
-    return render(request, 'coin_list.html', context)
+        if cap:
+            # Convert market_cap to a numerical value for comparison
+            queryset = queryset.annotate(market_cap_num=Cast('market_cap', CharField()))
+            
+            if cap == 'mega':
+                queryset = queryset.filter(market_cap_num__gt=200e9)
+            elif cap == 'large':
+                queryset = queryset.filter(market_cap_num__gt=10e9, market_cap_num__lte=200e9)
+            elif cap == 'mid-market':
+                queryset = queryset.filter(market_cap_num__gt=1e9, market_cap_num__lte=10e9)
+            elif cap == 'small-market':
+                queryset = queryset.filter(market_cap_num__gt=100e6, market_cap_num__lte=1e9)
+            elif cap == 'micro-market':
+                queryset = queryset.filter(market_cap_num__gt=10e6, market_cap_num__lte=100e6)
+            elif cap == 'nano-market':
+                queryset = queryset.filter(market_cap_num__gt=1e6, market_cap_num__lte=10e6)
+            elif cap == 'pico-market':
+                queryset = queryset.filter(market_cap_num__gt=100e3, market_cap_num__lte=1e6)
+            elif cap == 'femto-market':
+                queryset = queryset.filter(market_cap_num__lt=100e3)
+        
+        return queryset
