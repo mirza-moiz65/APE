@@ -3,7 +3,7 @@ from rest_framework import generics
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from django.db.models.functions import Cast
-from django.db.models import CharField
+from django.db.models import FloatField
 from .models import Coin
 from .serializers import CoinSerializer
 
@@ -34,7 +34,7 @@ class CoinListView(generics.ListAPIView):
         
         if cap:
             # Convert market_cap to a numerical value for comparison
-            queryset = queryset.annotate(market_cap_num=Cast('market_cap', CharField()))
+            queryset = queryset.annotate(market_cap_num=Cast('market_cap', FloatField()))
             
             if cap == 'mega':
                 queryset = queryset.filter(market_cap_num__gt=200e9)

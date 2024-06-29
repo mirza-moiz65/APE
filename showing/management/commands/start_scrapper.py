@@ -12,6 +12,8 @@ API_URL = "https://api.stocktwits.com/api/2/streams/symbol/{symbol}.json?filter=
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+RATE_LIMIT_DELAY = 0.5  # Delay in seconds between requests
+
 class Command(BaseCommand):
     help = 'Fetch latest posts for all cryptocurrencies'
 
@@ -20,7 +22,6 @@ class Command(BaseCommand):
         if s:
             return s.replace('\x00', '')
         return s
-
 
     async def fetch_posts(self, session, coin, max_cursor):
         page = 1
@@ -31,7 +32,7 @@ class Command(BaseCommand):
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
             }
 
-            print(f"SYMBOL: {page}, Page: {page}")
+            print(f"SYMBOL: {coin.symbol}, Page: {page}")
             async with session.get(url, headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
@@ -46,7 +47,6 @@ class Command(BaseCommand):
                     for item in posts:
                         post_id = str(item['id'])
                         post_exists = await sync_to_async(Post.objects.filter(url=post_id).exists)()
-
 
                         post_created_at = datetime.strptime(item['created_at'], '%Y-%m-%dT%H:%M:%SZ')
                         post_created_at = post_created_at.replace(tzinfo=dt_timezone.utc)
@@ -69,11 +69,13 @@ class Command(BaseCommand):
                             }
                         )
                         if created:
-                            logger.info(f'Successfully added post: {post.title}')
+                            logger.info(f'Successfully added post: {post.symbol}')
                     max_cursor = data['cursor']['max']
                 else:
                     logger.error(f"Failed to fetch posts for {coin.symbol}: {response.status}")
                     break
+            page += 1
+            await asyncio.sleep(RATE_LIMIT_DELAY)  # Add delay to prevent hitting rate limits
 
     async def main(self):
         coins = await sync_to_async(list)(Coin.objects.all())
