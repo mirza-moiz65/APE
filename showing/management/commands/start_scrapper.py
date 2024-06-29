@@ -26,6 +26,7 @@ class Command(BaseCommand):
     async def fetch_posts(self, session, coin, max_cursor):
         page = 1
         while True:
+            if page > 100: break
             url = API_URL.format(symbol=coin.symbol.replace('USDT', ''), max_cursor=max_cursor)
             headers = {
                 'Accept': 'application/json',
