@@ -7,7 +7,7 @@ from asgiref.sync import sync_to_async
 from datetime import datetime, timedelta, timezone as dt_timezone
 from showing.models import Coin, Post
 
-API_URL = "https://api.stocktwits.com/api/2/streams/symbol/{symbol}.json?filter=top&limit=100&max={max_cursor}"
+API_URL = "https://api.stocktwits.com/api/2/streams/symbol/{symbol}.X.json?filter=top&limit=100&max={max_cursor}"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
