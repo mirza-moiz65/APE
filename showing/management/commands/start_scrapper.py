@@ -69,7 +69,7 @@ class Command(BaseCommand):
                             }
                         )
                         if created:
-                            logger.info(f'Successfully added post: {post.symbol}')
+                            logger.info(f'Successfully added post: {coin.symbol}')
                     max_cursor = data['cursor']['max']
                 else:
                     logger.error(f"Failed to fetch posts for {coin.symbol}: {response.status}")
