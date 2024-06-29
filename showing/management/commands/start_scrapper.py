@@ -12,7 +12,7 @@ API_URL = "https://api.stocktwits.com/api/2/streams/symbol/{symbol}.json?filter=
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-RATE_LIMIT_DELAY = 0.5  # Delay in seconds between requests
+RATE_LIMIT_DELAY = 1.5  # Delay in seconds between requests
 
 class Command(BaseCommand):
     help = 'Fetch latest posts for all cryptocurrencies'
